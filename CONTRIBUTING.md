@@ -1,21 +1,22 @@
-# Contributing
+# Contributing to TiboWatch
 
-Keep TiboWatch small: Python standard library, a single public feed, local state, and systemd deployment. Discuss changes that add dependencies or alter notification behavior before implementing them.
+Useful contributions include fixes, clearer setup instructions and focused improvements to RSS forwarding. Start with [AGENTS.md](AGENTS.md) and [the engineering guide](docs/ENGINEERING.md).
 
-1. Fork the repository and create a focused branch.
-2. Preserve the existing offline test coverage. Add meaningful synthetic regression cases for behavior changes.
-3. Run:
+Fork the repository and use a focused branch. Describe the problem and the resulting behavior in your pull request. Discuss larger changes before adding dependencies or changing notification semantics; the project is intentionally small.
 
-   ```sh
-   python3 -m unittest discover -s tests -v
-   python3 -m py_compile watcher.py
-   git diff --check
-   ```
+## Check your change
 
-4. Describe the problem, the resulting behavior and actual validation in your pull request. Update both READMEs when user-facing instructions change.
+```sh
+python3 -m unittest discover -s tests -v
+python3 -m py_compile watcher.py
+sh -n deploy/install.sh
+sh -n deploy/activate.sh
+sh -n deploy/upgrade.sh
+git diff --check
+```
 
-Tests must use temporary state and mock network calls. Do not run the installer on a shared host as part of tests, send real notifications from CI, or commit credentials, device addresses, live state, logs or personal infrastructure details. Credential-like strings in tests are deliberately synthetic.
+Use temporary state and mocked RSS, Bark and CLI calls in tests. Real phone/model requests belong to an authorized deployment check, not CI. Include regression coverage for behavior changes.
 
-By contributing, you agree that your contribution may be distributed under this project's MIT license. Report vulnerabilities as described in SECURITY.md.
+For documentation, verify relative links and commands against the checkout, keep both READMEs aligned, and update the deployment prompt when setup changes. Report what was actually checked; a test count alone does not describe deployment coverage.
 
-Translation tests must mock the CLI subprocess. Do not invoke an authenticated model or send real Bark notifications in CI. Preserve exact visible content and the once-per-alert translation contract; retries must reuse stored payloads.
+Keep credentials and personal runtime files out of commits. Report vulnerabilities through [SECURITY.md](SECURITY.md). Contributions are distributed under the project's [MIT license](LICENSE).
