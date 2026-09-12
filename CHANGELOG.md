@@ -2,23 +2,19 @@
 
 ## v1.1.0 (unreleased)
 
-- Forward published SaveMeTibo RSS title/description instead of interpreting status.json events.
-- Try one local gpt-5.6-luna translation per new/changed alert; fall back immediately to original English on any error.
-- Persist the selected exact payload across Bark retries; never retranslate retries or silently truncate.
-- Keep atomic state, backup, lock, retry limits and secure Bark configuration.
-- Baseline RSS on v1 migration, preserve the installation test, refuse unresolved pending notifications.
-- Keep source failures local; remove automatic Bark editorial/health notifications.
+- Forward published SaveMeTibo RSS alerts instead of interpreting status.json events.
+- Translate each new/changed alert once through the local Codex CLI; use the original English on failure.
+- Persist the selected notification across Bark retries without retranslation or silent truncation.
+- Reuse the deploying user's existing Codex login with a minimal local service auth context.
+- Allow 30 seconds for translation and 240 seconds for a service run.
+- Preserve state safety, quiet RSS initialization and existing installation-test markers during v1 migration.
+- Add a standalone Codex deployment prompt, agent navigation and clearer English/Chinese documentation.
+- Keep source failures in local status rather than adding Bark commentary or health alerts.
 
 ## v1.0.0
 
 Initial public release.
 
-- SaveMeTibo signal polling
-- Bark iOS notifications
-- Semantic deduplication
-- Watch / confirmed / landed lifecycle
-- Correction handling
-- Linked team_hint updates
-- Stale/outage monitoring
-- Persistent retry queue
-- systemd deployment
+- SaveMeTibo signal polling and Bark iOS notifications.
+- Semantic deduplication, reset lifecycle, corrections and linked team hints.
+- Persistent retries, source-health monitoring and systemd deployment.
