@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.1.0 (unreleased)
+## v1.1.0 — 2026-09-13
 
 - Forward published SaveMeTibo RSS alerts instead of interpreting status.json events.
 - Translate each new/changed alert once through the local Codex CLI; use the original English on failure.

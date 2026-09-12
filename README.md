@@ -6,19 +6,21 @@
 
 TiboWatch is a small, self-hosted Linux app that forwards [SaveMeTibo's published RSS alerts](https://savemetibo.com/feed.xml) through [Bark](https://github.com/Finb/Bark). It can translate new alerts into Simplified Chinese using your existing Codex CLI login. If translation is unavailable, the original English still goes through.
 
-These instructions describe the RSS-based v1.1 implementation. The deployment guide checks the selected code version before installing.
+These instructions describe the RSS-based v1.1.0 release. The deployment guide checks the selected code version before installing.
 
 ## Deploy with one prompt
 
 Open Codex on your Linux server, or use a Codex session with authorized SSH access to it. Paste this:
 
 ```text
-Please deploy https://github.com/hkwsg/tibowatch on my authorized Linux server.
+Please deploy v1.1.0 of https://github.com/hkwsg/tibowatch on my authorized Linux server.
 Read DEPLOY_WITH_CODEX.md and follow its setup workflow for the selected version.
 Check the environment yourself, ask me for my Bark push address when needed,
 then complete configuration, the phone test and scheduled operation.
 Reuse my existing Codex login for translation when available.
 ```
+
+Pinned release entry: [v1.1.0 deployment prompt](https://github.com/hkwsg/tibowatch/blob/v1.1.0/DEPLOY_WITH_CODEX.md).
 
 The complete, standalone prompt is in **[DEPLOY_WITH_CODEX.md](DEPLOY_WITH_CODEX.md)**. It also works from a downloaded repository: ask Codex to read that file and start.
 

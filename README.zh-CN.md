@@ -6,19 +6,21 @@
 
 TiboWatch 是一个部署在 Linux 服务器上的轻量转发器：读取 [SaveMeTibo 已发布的 RSS 提醒](https://savemetibo.com/feed.xml)，通过 [Bark](https://github.com/Finb/Bark) 发到 iPhone。它还可以复用你已有的 Codex CLI 登录，把新消息翻译成简体中文；翻译暂时不可用时，就发送英文原文。
 
-本文对应基于 RSS 的 v1.1 实现。部署提示词会先核对所选代码版本，再执行安装。
+本文对应基于 RSS 的 v1.1.0 正式版本。部署提示词会先核对所选代码版本，再执行安装。
 
 ## 一句话交给 Codex 部署
 
 在服务器上的 Codex，或已经获准通过 SSH 操作服务器的 Codex 会话里，粘贴：
 
 ```text
-请在我授权的 Linux 服务器上部署 https://github.com/hkwsg/tibowatch。
+请在我授权的 Linux 服务器上部署 https://github.com/hkwsg/tibowatch 的 v1.1.0 正式版本。
 先读取所选版本的 DEPLOY_WITH_CODEX.md，按其中流程执行。
 环境信息请自行检查，需要时引导我提供 Bark 推送地址，
 然后完成配置、手机测试和定时运行。
 翻译优先复用我已有的 Codex 登录。
 ```
+
+固定版本入口：[v1.1.0 部署提示词](https://github.com/hkwsg/tibowatch/blob/v1.1.0/DEPLOY_WITH_CODEX.md)。
 
 完整、独立的部署提示词在 **[DEPLOY_WITH_CODEX.md](DEPLOY_WITH_CODEX.md)**。已经下载项目的话，直接让 Codex“读取根目录这个文件并开始部署”即可。
 
