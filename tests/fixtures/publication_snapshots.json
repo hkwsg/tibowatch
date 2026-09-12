@@ -1,0 +1,49 @@
+{
+  "events": [
+    {
+      "event_id": "evt_2003dde4263bed5bf311624125f92586",
+      "state": "landed",
+      "chance_48h": null,
+      "lifecycle": [
+        {
+          "approval_id": "apr_8520167c6f4f10a96d674ef8013b7e97",
+          "chance_48h": null,
+          "headline": "Codex reset arrived, roughly six hours after the promised midnight Pacific deadline. Limits are back!",
+          "published_at": "2026-09-12T08:26:53.600982Z",
+          "share_card_url": "https://savemetibo.com/events/evt_2003dde4263bed5bf311624125f92586/artifacts/apr_8520167c6f4f10a96d674ef8013b7e97.png",
+          "state": "landed"
+        }
+      ]
+    },
+    {
+      "event_id": "evt_1a55f3babab4167efa9658fffb4f34c9",
+      "state": "watch",
+      "chance_48h": 86,
+      "lifecycle": [
+        {
+          "approval_id": "apr_031a4b0dc2f784f6e58091a44946e797",
+          "chance_48h": 86,
+          "headline": "A major quota incident puts another Codex reset in play.",
+          "published_at": "2026-08-31T16:30:31.919291Z",
+          "share_card_url": "https://savemetibo.com/events/evt_1a55f3babab4167efa9658fffb4f34c9/artifacts/apr_031a4b0dc2f784f6e58091a44946e797.png",
+          "state": "watch"
+        }
+      ]
+    },
+    {
+      "event_id": "evt_08189f574a5566d2cac8b3a9e18a73be",
+      "state": "confirmed",
+      "chance_48h": null,
+      "lifecycle": [
+        {
+          "approval_id": "apr_5f32e1706f0fcdfd291ce2a317241ff0",
+          "chance_48h": 97,
+          "headline": "A Codex usage reset is set to land at 6pm PST.",
+          "published_at": "2026-08-30T20:31:50.046316Z",
+          "share_card_url": "https://savemetibo.com/events/evt_08189f574a5566d2cac8b3a9e18a73be/artifacts/apr_5f32e1706f0fcdfd291ce2a317241ff0.png",
+          "state": "watch"
+        }
+      ]
+    }
+  ]
+}

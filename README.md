@@ -6,21 +6,21 @@
 
 TiboWatch is a small, self-hosted Linux app that forwards [SaveMeTibo's published RSS alerts](https://savemetibo.com/feed.xml) through [Bark](https://github.com/Finb/Bark). It can translate new alerts into Simplified Chinese using your existing Codex CLI login. If translation is unavailable, the original English still goes through.
 
-These instructions describe the RSS-based v1.1.0 release. The deployment guide checks the selected code version before installing.
+These instructions describe the RSS-based v1.1.1 release. The deployment guide checks the selected code version before installing.
 
 ## Deploy with one prompt
 
 Open Codex on your Linux server, or use a Codex session with authorized SSH access to it. Paste this:
 
 ```text
-Please deploy v1.1.0 of https://github.com/hkwsg/tibowatch on my authorized Linux server.
+Please deploy v1.1.1 of https://github.com/hkwsg/tibowatch on my authorized Linux server.
 Read DEPLOY_WITH_CODEX.md and follow its setup workflow for the selected version.
 Check the environment yourself, ask me for my Bark push address when needed,
 then complete configuration, the phone test and scheduled operation.
 Reuse my existing Codex login for translation when available.
 ```
 
-Pinned release entry: [v1.1.0 deployment prompt](https://github.com/hkwsg/tibowatch/blob/v1.1.0/DEPLOY_WITH_CODEX.md).
+Pinned release entry: [v1.1.1 deployment prompt](https://github.com/hkwsg/tibowatch/blob/v1.1.1/DEPLOY_WITH_CODEX.md).
 
 The complete, standalone prompt is in **[DEPLOY_WITH_CODEX.md](DEPLOY_WITH_CODEX.md)**. It also works from a downloaded repository: ask Codex to read that file and start.
 
@@ -41,20 +41,20 @@ There is no X API key, Telegram account, database or Docker requirement. Transla
 Illustrative upstream alert:
 
 ```text
-Codex — Reset landed
+Codex — Watch
 
-Limits are back.
+A major quota incident puts another Codex reset in play.
 ```
 
-With Chinese translation, it may read:
+With a matching 86% publication snapshot and Chinese translation, it may read:
 
 ```text
-Codex — 重置已完成
+Codex — 重置观察：86%
 
-额度已恢复。
+一次重大额度故障，使 Codex 再次重置成为可能。
 ```
 
-The notification contains the upstream title and body, or their translation. TiboWatch adds no source label, timestamp or commentary. Tapping it opens the RSS item's valid HTTPS link, or the SaveMeTibo homepage if that link is missing or unsafe.
+The notification contains the upstream title and body, or their translation. TiboWatch adds no source label, timestamp or commentary. Notifications request Bark history archival and carry no external click URL. A reliably matched publication probability appears at the title end; missing data adds no suffix. Original emoji are preserved in the text path and requested in translation. A matching upstream PNG may be used as a best-effort icon, not a full image attachment; phone cropping is not guaranteed.
 
 ## How it works
 

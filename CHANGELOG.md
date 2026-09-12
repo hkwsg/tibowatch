@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.1 — 2026-09-13
+
+- Omit Bark external click URLs and request history archival, including pending retries.
+- Append the matching SaveMeTibo publication probability to the notification title.
+- Preserve upstream emoji and optionally reuse matching upstream PNG icons.
+- Keep RSS dedupe, one Luna translation, English fallback and state v2 compatibility; no repeat migration or credential setup.
+
 ## v1.1.0 — 2026-09-13
 
 - Forward published SaveMeTibo RSS alerts instead of interpreting status.json events.

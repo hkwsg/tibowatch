@@ -29,11 +29,21 @@ SaveMeTibo's `feed.xml` supplies title, description, GUID, publication date and 
 
 Initial RSS data becomes a quiet baseline. An edit supersedes an older pending version of the same GUID. The service does not infer event severity, rewrite the message or add commentary. Upstream removal alone does not create a local retraction message.
 
+## Publication display metadata
+
+RSS still decides whether an alert exists. Only when awaiting selections exist, one optional `status.json` fetch (5-second timeout, normal TLS/2 MiB cap, no retry) supplies the batch. Exact `RSS.guid == events[].lifecycle[].approval_id` and matching trimmed RSS body/lifecycle headline are required. Invalid structure, conflicting IDs or mismatched text omit metadata. Parent event and homepage values are never substitutes.
+
+Use the matched lifecycle's finite 0–100 numeric `chance_48h` without rounding or scaling; bool/null are not numbers. Matched `landed` displays 100%, including null; other missing probabilities add no suffix. Append `：86%` after translation (or to English fallback), unless the same percentage is already present. Probability/icon changes alone do not affect RSS fingerprints or trigger notifications.
+
+Only a matching `https://savemetibo.com/events/<event_id>/artifacts/<approval_id>.png` can supply `icon`. No runtime image download is added. An optional icon that exceeds the 3000-byte request budget is removed before selection is saved; text is never truncated. Icon availability/cropping is best-effort, not a full-card attachment.
+
+The final Bark JSON explicitly selects title/body, optional icon and the existing envelope, sets `isArchive: "1"`, and omits `url` and `action`, even for old selected pending payloads. Internal URLs remain solely for state compatibility. Existing selected jobs are not redecorated, retransformed or retranslated. State v2 installations need ordinary code maintenance only, with no repeated migration, Bark setup or Codex login.
+
 ## Translation and delivery
 
 The application passes title/body through stdin to a single noninteractive `codex exec` process, using a temporary directory, a JSON output schema and the final-response file. It disables tool use in the configured invocation, excludes Bark credentials from the child environment and reads only the two expected output fields.
 
-Before invocation, the pending job records the original-English fallback and its attempt marker. Success replaces that job's selected title/body. Failure or interruption leaves English selected. Bark retries reuse the selection without another model call. Structural JSON checks do not verify translation meaning.
+Before invocation, the pending job records the English fallback with its selected display metadata and its attempt marker. Success replaces that job's selected title/body. Failure or interruption leaves English selected. Bark retries reuse the selection without another model call. The translation prompt also requests preservation of original emoji, including combined sequences. Structural JSON checks do not verify translation meaning or guarantee model compliance.
 
 State version 2 separates observed fingerprints, pending selections and accepted requests. A file lock, atomic writes and backup protect state. Bark acceptance requires HTTP 200 and integer JSON `code=200`; it is not a phone receipt acknowledgment. Ambiguous network failures can still duplicate a notification.
 
