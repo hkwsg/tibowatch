@@ -63,9 +63,13 @@ systemd 可加载非敏感 `/etc/tibo-watch/runtime.env`，样例见 [deploy/run
 
 - `TIBOWATCH_TRANSLATE=0` 关闭翻译（默认开启）。
 - `TIBOWATCH_CODEX_BIN` 指定可访问的已有可执行文件，默认使用 PATH 中的 codex。
-- 可选 `CODEX_HOME` 需指向服务用户可用的已有 CLI 登录环境。
+- `CODEX_HOME` 指向服务侧保存现有账号最小认证上下文的目录，例如 `/var/lib/tibo-watch/codex`。
 
-其他账号的登录不会自动共享给 `tibo-watch`，且 `ProtectHome=true` 会阻止服务访问 home 目录内的 CLI/登录文件。不要放宽秘密权限、以 root 运行 watcher 或复制其他用户凭据来绕过。没有适当的已有 CLI 环境就使用英文回退。TiboWatch 不读取登录文件，由 CLI 自行处理认证。
+TiboWatch 可以复用服务器已有的同一个 ChatGPT/Codex 账号及现有登录凭据，无需第二个 Codex 账号、单独的 device-auth 或 OpenAI API Key。服务仍以独立、非 root 的 `tibo-watch` **操作系统用户**运行，并保持 `ProtectHome=true`。
+
+人工仅将 CLI 正常认证所需的最小上下文（文件认证方式下的现有 `auth.json`）安全 provision 到 `/var/lib/tibo-watch/codex`，将 `CODEX_HOME` 指向该目录。目录与 auth 文件均由 `tibo-watch` 拥有，权限分别为 `0700` 和 `0600`。不复制完整 home、`.codex`、配置或历史目录，也不让服务访问交互用户整个 home。auth 内容不得进入 Git、日志、Issue 或报告，不回显 token。安装器不 provision 凭据，TiboWatch 将认证交由 CLI 处理。
+
+不引入凭据同步 daemon 或认证代理。凭据失效或被撤销时，翻译在现有超时上限内失败并立即选择英文原文；需要时人工重新 provision 当前有效 auth 即可。Bark 重试仍发送已保存的 payload，不重新翻译。
 
 参数依据：[OpenAI 非交互文档](https://developers.openai.com/codex/noninteractive/)和[配置参考](https://developers.openai.com/codex/config-reference/)。旧 CLI 不支持参数时同样回退英文。
 

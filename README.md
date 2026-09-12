@@ -68,9 +68,13 @@ The systemd unit can read optional non-secret `/etc/tibo-watch/runtime.env` sett
 
 - `TIBOWATCH_TRANSLATE=0` disables translation (default: enabled).
 - `TIBOWATCH_CODEX_BIN` selects an accessible installed executable (default: `codex` on PATH).
-- `CODEX_HOME`, if supplied, must refer to an existing CLI login accessible to the service user.
+- `CODEX_HOME` points to the service-side minimal auth context for the existing account (for example, `/var/lib/tibo-watch/codex`).
 
-A login belonging to another account is **not** automatically accessible to `tibo-watch`. `ProtectHome=true` also blocks home-directory CLI binaries/login files in the system service. Do not relax secret permissions, run the watcher as root or copy another user's credentials to work around this. Without an appropriately provisioned existing CLI context, use the English fallback. No login files are read by TiboWatch itself; the CLI handles its own authentication.
+TiboWatch can reuse the server's existing ChatGPT/Codex account and login credentials. No separate Codex account, device-auth flow or OpenAI API key is required. The service still runs as the independent, non-root `tibo-watch` OS user with `ProtectHome=true`.
+
+Manually provision only the minimal authentication context required by the CLI (the existing `auth.json` for file-based authentication) into `/var/lib/tibo-watch/codex`, then set `CODEX_HOME` to that directory. Keep the directory owned by `tibo-watch` with mode `0700` and the auth file with mode `0600`. Do not copy the full home, `.codex`, configuration or history directories, or grant the service access to the interactive user's home. Keep auth contents out of Git, logs, issues and reports; never print tokens. The installer does not provision credentials, and TiboWatch leaves authentication to the CLI.
+
+There is no credential synchronization daemon or authentication proxy. If the provisioned credentials expire or are revoked, translation fails and the original English is selected immediately, within the existing timeout. Manually provision the current valid auth context when needed. Bark retries still use the saved payload without translating again.
 
 CLI behavior is documented in [OpenAI's non-interactive guide](https://developers.openai.com/codex/noninteractive/) and [configuration reference](https://developers.openai.com/codex/config-reference/). Older CLI versions rejecting any flag simply trigger English fallback.
 
