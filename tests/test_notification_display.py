@@ -186,6 +186,19 @@ class Display(unittest.TestCase):
         self.notify();self.assertNotIn('icon',self.storage.load()['pending']['apr_new']['payload'])
         self.assertEqual(self.sent[-1]['body'],body)
 
+    def test_configured_icon_is_persisted_and_retry_does_not_change_it(self):
+        custom='https://raw.githubusercontent.com/hkwsg/tibowatch/'+'a'*40+'/assets/notification-icon.png'
+        with patch.dict(w.os.environ,{'TIBOWATCH_ICON_URL':custom}):
+            self.fail=True;self.notify()
+        self.assertEqual(self.sent[-1]['icon'],custom)
+        self.fail=False;self.poll(NOW+300)
+        self.assertEqual(self.sent[-1]['icon'],custom)
+        self.assertEqual(self.supplement_calls,1);self.assertEqual(self.translator.call_count,1)
+
+    def test_invalid_configured_icon_uses_upstream(self):
+        with patch.dict(w.os.environ,{'TIBOWATCH_ICON_URL':'https://evil.test/icon.png'}):self.notify()
+        self.assertEqual(self.sent[-1]['icon'],self.events[0]['lifecycle'][0]['share_card_url'])
+
     def test_emoji_parse_persistence_and_output(self):
         self.translator.side_effect=ValueError();self.fail=True;self.notify()
         chosen=self.storage.load()['pending']['apr_new']['payload']

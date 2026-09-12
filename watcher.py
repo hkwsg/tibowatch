@@ -332,9 +332,10 @@ def publication_snapshots():
         return {}
 
 def icon_url(value):
-    # Only publication-specific PNG artifacts; no query, redirect URL or userinfo.
+    # Publication PNGs or the approved repository icon pinned to a commit; no query/userinfo.
     return isinstance(value, str) and re.fullmatch(
-        r'https://savemetibo\.com/events/evt_[A-Za-z0-9_-]+/artifacts/apr_[A-Za-z0-9_-]+\.png', value) is not None
+        r'(?:https://savemetibo\.com/events/evt_[A-Za-z0-9_-]+/artifacts/apr_[A-Za-z0-9_-]+\.png'
+        r'|https://raw\.githubusercontent\.com/hkwsg/tibowatch/[0-9a-f]{40}/assets/notification-icon\.png)', value) is not None
 
 def display_fields(guid, payload, snapshots):
     record = snapshots.get(guid)
@@ -372,6 +373,9 @@ def select_payloads(s, save, translator=translate, snapshots=None, key=''):
     for guid, job in [(g, j) for g, j in jobs if j['selection'] == 'awaiting'][:BATCH]:
         original = job['payload'].copy()
         percent, icon = display_fields(guid, original, snapshots or {})
+        configured_icon = os.environ.get('TIBOWATCH_ICON_URL')
+        if icon_url(configured_icon):
+            icon = configured_icon
         job['payload']['title'] = display_title(original['title'], percent)
         if icon:
             job['payload']['icon'] = icon

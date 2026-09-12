@@ -56,6 +56,8 @@ Codex — 重置观察：86%
 
 The notification contains the upstream title and body, or their translation. TiboWatch adds no source label, timestamp or commentary. Notifications request Bark history archival and carry no external click URL. A reliably matched publication probability appears at the title end; missing data adds no suffix. Original emoji are preserved in the text path and requested in translation. A matching upstream PNG may be used as a best-effort icon, not a full image attachment; phone cropping is not guaranteed.
 
+An operator can select a fixed repository-hosted icon with `TIBOWATCH_ICON_URL`; see the engineering guide.
+
 ## How it works
 
 ```text
