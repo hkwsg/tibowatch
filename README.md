@@ -2,163 +2,142 @@
 
 [简体中文](README.zh-CN.md)
 
-A lightweight, self-hosted watcher for public Codex reset and quota signals, with Bark notifications for iPhone.
+A lightweight forwarder for [SaveMeTibo's published RSS alerts](https://savemetibo.com/feed.xml), with optional Simplified Chinese translation and Bark notifications for iPhone.
 
-TiboWatch polls the third-party [SaveMeTibo](https://savemetibo.com/) JSON feed and sends relevant changes through your existing [Bark](https://github.com/Finb/Bark) push service. It monitors reset, quota, banked-reset and team-hint signals. It does **not** query your personal Codex account.
+**SaveMeTibo publishes → TiboWatch optionally translates → Bark delivers.** TiboWatch does not perform a second editorial interpretation of events. RSS `title` and `description` are the authoritative visible content, without added timestamps, source labels, cautions, explanations or internal IDs.
+
+> v1.1 is under review. Existing v1 installations should continue running until the upgrade is approved. The v1.0.0 release remains available separately.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    A[Public signal source] --> B[TiboWatch]
-    B --> C[Semantic dedupe]
-    C --> D[Bark]
-    D --> E[iPhone]
+    A[SaveMeTibo RSS] --> B[GUID + content dedupe]
+    B --> C[One optional Codex translation]
+    C --> D[Persist exact title/body]
+    D --> E[Bark API]
+    E --> F[APNs → iPhone]
 ```
 
-SaveMeTibo → TiboWatch → Bark API → Apple Push Notification Service (APNs) → iPhone.
-
-A systemd timer runs a short Python process every five minutes, with a little scheduling jitter. Local JSON state tracks observed events and accepted notifications. No inbound ports are opened.
-
-## Features
-
-- Reset watch signals with evidence, confirmed and landed states.
-- Explicit corrections/retractions and observation-ended notices for previously notified events.
-- Linked `team_hint` updates, preserving the canonical event's state.
-- Semantic deduplication across repeated polls and process restarts.
-- A quiet first-run historical baseline: existing events are not replayed.
-- Persistent pending notifications, bounded retries and `Retry-After` handling.
-- Stale-source detection, outage alerts and recovery notices.
-- Python standard library only: no database, Docker dependency, Telegram, X API, browser automation or LLM.
-
-Notifications use fixed Chinese titles and explanations with a truncated upstream English summary. English notification localization is not included in v1.
+If translation fails for any reason, the original RSS English title and body are selected immediately. There is no larger-model fallback, translation retry loop, translation service or extra notification queue. The existing local pending queue stores the selected payload for Bark retries.
 
 ## Requirements
 
-- Linux with systemd, such as a recent Debian or Ubuntu installation.
-- Python **3.11+**, including `zoneinfo`, and system time-zone data.
-- `sudo` for installation, plus standard system tools (`useradd`, `runuser`, `install`).
-- Outbound HTTPS access to SaveMeTibo and `api.day.app`.
-- The Bark iOS app registered with `api.day.app`, with notifications allowed.
+- Linux with systemd (for example, recent Debian or Ubuntu), Python 3.11+, and standard `sudo`, `useradd`, `runuser`, `install` tools.
+- Outbound HTTPS to SaveMeTibo and `api.day.app`; no inbound ports.
+- Bark iOS app registered with `api.day.app`.
+- Optional: an existing authenticated local Codex CLI accessible to the **watcher service user**, supporting the flags below. Missing CLI/login/model/quota means immediate English fallback.
 
-The default installer targets a system-wide Linux installation. It does not upgrade your OS, install Python, change networking or install a Bark server. CI checks Python 3.11 and 3.14; other distribution combinations are not exhaustively tested.
+No database, Docker, Telegram, X API, browser automation or Python dependencies. The installer does not install or authenticate Codex, copy login files, change networking or modify other services.
 
-## Quick start
+## New installation
+
+After reviewing the version you intend to install:
 
 ```sh
 git clone https://github.com/hkwsg/tibowatch.git
 cd tibowatch
 python3 -m unittest discover -s tests -v
 sudo sh deploy/install.sh
-```
-
-The installer creates an independent `tibo-watch` user, code directory and systemd units. It preserves existing task state and credentials on repeat installs; it refuses unrelated existing resources. It does not enable the timer automatically.
-
-Configure Bark **in your own trusted terminal**:
-
-```sh
 sudo python3 /opt/tibo-watch/watcher.py configure-bark
-```
-
-Paste the base push address from the Bark app when prompted. Input is hidden. Use the device address only, without a title/body suffix or query parameters. Only `https://api.day.app/` is accepted as the service origin. Do not put the address in shell arguments, Git, issues or screenshots.
-
-Then activate:
-
-```sh
 sudo /opt/tibo-watch/activate.sh
 ```
 
-Activation sends one clearly labeled installation test, runs a production check, and enables the timer only after push-service acceptance and a healthy baseline. Existing real pending notifications may also be sent by that production check; they are separate from the installation test.
+Enter the base Bark device address in your trusted terminal when prompted; input is hidden. Only the `api.day.app` HTTPS origin is accepted, without title/body suffixes or query parameters. Do not put the address in shell arguments, issues, screenshots or Git.
 
-Check the notification on your iPhone. Bark accepting a request does not prove delivery to the device. The CLI reports device receipt as unconfirmed; it cannot observe your phone.
+Activation sends one clearly labeled installation test, then requires a healthy baseline before enabling the timer. The initial healthy RSS fetch baselines existing items without replaying history or invoking Codex. Repeating activation does not resend an already-attempted installation test; an uncertain test result requires manual review. Existing real pending items may be sent separately by the production check.
 
-Repeating activation does not automatically resend the installation test. If the test reports an uncertain result, inspect status before doing anything else. A maintainer should review the test marker under the state lock before any intentional retest; do not delete state or repeatedly retry to force a notification.
+## One best-effort translation
 
-## Status and operation
+Each genuinely new/changed alert gets at most one direct subprocess invocation using **only `gpt-5.6-luna`**. There is no model availability probe on quiet polls. CLI invocation:
 
 ```sh
-# State summary: last run, last healthy source, freshness, retries, push acceptance
-sudo -u tibo-watch python3 /opt/tibo-watch/watcher.py status
-
-# Validate the public feed without changing state
-sudo -u tibo-watch python3 /opt/tibo-watch/watcher.py check-source
-
-# Read-only simulation: no production writes or notifications
-sudo -u tibo-watch python3 /opt/tibo-watch/watcher.py dry-run
-
-# Run the configured production service immediately
-sudo systemctl start tibo-watch.service
-
-# Scheduling and logs
-systemctl list-timers tibo-watch.timer
-sudo journalctl -u tibo-watch.service -n 20 --no-pager
+codex exec --ephemeral --ignore-user-config --ignore-rules \
+  --skip-git-repo-check --sandbox read-only --model gpt-5.6-luna \
+  -c 'approval_policy="never"' -c features.shell_tool=false \
+  -c features.unified_exec=false -c 'web_search="disabled"' \
+  -c project_doc_max_bytes=0 --output-schema <temporary-schema> \
+  --output-last-message <temporary-output> -
 ```
 
-A completed oneshot service normally shows `inactive`; check `Result=success`, `ExecMainStatus=0`, and whether the timer is enabled and active. No notifications can mean no new signal: check source age, `health.reason`, `push_status` and `pending_count` before diagnosing a fault.
+The program uses an argument array and JSON text through stdin, never a shell command string. It uses a temporary working directory, an **30-second timeout**, discarded stdout/stderr, no Bark key in the subprocess environment, and strict final JSON parsing with exactly `title` and `body` string fields. It kills the process group on timeout. The prompt requests complete translation, no summary/omission/commentary, and preservation of product names such as Codex, Astra and ChatGPT. Structural validation cannot prove semantic translation accuracy.
 
-Pause:
+The original English fallback and an attempt marker are saved **before** invocation. If the process crashes during translation, the next run sends that stored English rather than translating again. A successful selection replaces it atomically. Bark retries never retranslate, even when login or models later become available. The systemd oneshot limit is 240 seconds. Up to five payload selections and five sends are processed per poll; excess items remain in the same persistent queue.
+
+The systemd unit can read optional non-secret `/etc/tibo-watch/runtime.env` settings; see [deploy/runtime.env.example](deploy/runtime.env.example):
+
+- `TIBOWATCH_TRANSLATE=0` disables translation (default: enabled).
+- `TIBOWATCH_CODEX_BIN` selects an accessible installed executable (default: `codex` on PATH).
+- `CODEX_HOME` points to the service-side minimal auth context for the existing account (for example, `/var/lib/tibo-watch/codex`).
+
+TiboWatch can reuse the server's existing ChatGPT/Codex account and login credentials. No separate Codex account, device-auth flow or OpenAI API key is required. The service still runs as the independent, non-root `tibo-watch` OS user with `ProtectHome=true`.
+
+Manually provision only the minimal authentication context required by the CLI (the existing `auth.json` for file-based authentication) into `/var/lib/tibo-watch/codex`, then set `CODEX_HOME` to that directory. Keep the directory owned by `tibo-watch` with mode `0700` and the auth file with mode `0600`. Do not copy the full home, `.codex`, configuration or history directories, or grant the service access to the interactive user's home. Keep auth contents out of Git, logs, issues and reports; never print tokens. The installer does not provision credentials, and TiboWatch leaves authentication to the CLI.
+
+There is no credential synchronization daemon or authentication proxy. If the provisioned credentials expire or are revoked, translation fails and the original English is selected immediately, within the existing timeout. Manually provision the current valid auth context when needed. Bark retries still use the saved payload without translating again.
+
+CLI behavior is documented in [OpenAI's non-interactive guide](https://developers.openai.com/codex/noninteractive/) and [configuration reference](https://developers.openai.com/codex/config-reference/). Older CLI versions rejecting any flag simply trigger English fallback.
+
+## Dedupe and content rules
+
+- First healthy RSS run: historical baseline, no notification or translation.
+- New GUID: one candidate; changed title/description for an existing GUID: one new candidate.
+- Identical title/description: no notification, even if order, `pubDate` or `link` changes.
+- `pubDate` only orders new candidates chronologically. `guid` is internal identity.
+- Bark click target is the RSS link when it is valid HTTPS without user-info or whitespace (any valid port); otherwise it is `https://savemetibo.com/`. Click targets are not fetched by the watcher.
+- XML text/CDATA is preserved after XML entity decoding. Embedded HTML is left as provided, not rendered or stripped. Original content is never censored, summarized or silently truncated.
+- The conservative outgoing JSON budget is **3000 UTF-8 bytes**, including key/envelope. An oversize selected payload remains pending with `payload_too_large`; it is never shortened or replaced after selection.
+- Feed errors, invalid XML, conflicting duplicate GUIDs and unexpectedly empty feeds preserve state and appear in local status/logs. No extra Bark source/outage/editorial alerts are generated. A quiet feed is not stale merely because no new alert was published.
+
+## Reliability and operation
+
+State uses a file lock, atomic replacement, fsync and a rolling backup. Observed content and accepted sends are separate; pending is persisted before sending. Bark success requires HTTP 200 plus integer JSON `code=200`. Retries use 5/10/20/60-minute backoff, respect longer `Retry-After`, and slow authentication failures to at least a day. Failed feed checks pause queue processing until a healthy fetch. Pending items are retained without a six-hour expiry.
 
 ```sh
+sudo -u tibo-watch python3 /opt/tibo-watch/watcher.py status
+sudo -u tibo-watch python3 /opt/tibo-watch/watcher.py check-source
+sudo -u tibo-watch python3 /opt/tibo-watch/watcher.py dry-run
+sudo systemctl start tibo-watch.service
+systemctl list-timers tibo-watch.timer
+sudo journalctl -u tibo-watch.service -n 20 --no-pager
 sudo systemctl disable --now tibo-watch.timer
 ```
 
-This does not stop a currently running oneshot. If needed, stop that task separately with `sudo systemctl stop tibo-watch.service`. Resume a previously validated installation with `sudo systemctl enable --now tibo-watch.timer`.
+`dry-run` does not write state, translate or send. `status` shows fetch age, failures, pending errors and translation outcomes for pending items, without message bodies. A completed oneshot normally becomes inactive: check `Result=success`, `ExecMainStatus=0` and timer activity. Resume a validated installation with `sudo systemctl enable --now tibo-watch.timer`. Pausing the timer does not stop an already-running oneshot.
 
-Rotate your Bark key with the same hidden-input configuration command; subsequent service runs read the new value. Do not edit credentials through shell command arguments.
+`config.example.json` documents fixed defaults; it is not loaded at runtime. The timer remains five minutes with up to 15 seconds jitter; HTTP timeout is 10 seconds and input size limit is 2 MiB.
 
-## Defaults and behavior
+## Upgrade from v1 — only after review
 
-| Setting | v1 default |
-| --- | --- |
-| Feed | `https://savemetibo.com/status.json` |
-| Bark endpoint | `https://api.day.app/push` |
-| Polling | 5 minutes, with up to 15 seconds of timer jitter |
-| HTTP timeout / response limit | 10 seconds / 2 MiB |
-| Stale / outage thresholds | 30 / 60 minutes; explicit upstream outage also applies |
-| Ordinary catch-up window | 6 hours |
-| Same-state update cooldown | 30 minutes, retaining the latest pending version |
-| Per-run send limit | 5 queued notifications |
-| Notification time zone | `Asia/Shanghai`; does not change the OS time zone |
+Do not use the installation-test path to migrate. Run the reviewed release's helper:
 
-`config.example.json` documents fixed defaults; it is **not** loaded as a runtime configuration file. Changing those defaults currently requires reviewing the source or unit files.
+```sh
+sudo sh deploy/upgrade.sh
+```
 
-State transitions and explicit corrections bypass the ordinary update cooldown. Linked hints use separate supplement semantics and cannot downgrade a confirmed or landed event. A simultaneous useful canonical update takes priority over its hint. Identical normalized text, timestamp-only changes, probability changes and array reorder do not trigger another notification. Text matching is deterministic, not general natural-language understanding.
+It pauses only this task's timer, refuses to proceed while a oneshot is active or any pending notification is unresolved, and saves a protected pre-upgrade state snapshot before installing code. Resolve v1 pending items rather than deleting them. It runs the new service twice and re-enables the timer only after fresh RSS/state checks pass. Any failure leaves the timer paused for inspection.
 
-State is written atomically with a lock and backup. Failed sends remain pending; retries use 5/10/20/60-minute backoff and respect longer `Retry-After` values. Authentication failures back off for at least a day. A damaged primary state attempts backup recovery; unrecoverable state requires manual intervention rather than silently becoming a fresh installation.
+The first healthy new run migrates state version 1 → 2, makes an additional v1 backup, preserves the installation-test marker, and baselines RSS without replay. Migration refuses nonempty v1 pending queues. Credentials are untouched. Retain the old code and protected state backups for rollback: v1 cannot read v2 state. For rollback, stop this task and restore a matched old code/state pair before resuming; account for notifications already accepted since the snapshot.
 
-## Security model
+## Security and limitations
 
-The Bark device key is a **secret**. Never commit it. It is stored in the root-only `/etc/tibo-watch/bark.env` file (0600; parent directory 0700). The systemd manager reads the EnvironmentFile and passes the key to the dedicated `tibo-watch` process. The watcher does not require root for normal operation and cannot read the protected configuration directory itself.
+The Bark key is a secret, held in root-only `/etc/tibo-watch/bark.env` (0600, directory 0700), read by the systemd manager. Normal execution uses the non-root `tibo-watch` account, read-only installed code, and writable task state only. TLS is verified, POST redirects are blocked, and no request body/key is logged. Root is needed for installation, not normal forwarding. See [SECURITY.md](SECURITY.md).
 
-Code lives under `/opt/tibo-watch`; only `/var/lib/tibo-watch` is writable to the service. No inbound listener, reverse proxy, Telegram session or personal account credential is needed. Requests verify TLS. Bark uses POST JSON, redirects are not followed, notification URLs are restricted, and logs omit request bodies and keys. Notifications use the ordinary `active` level with no automatic clipboard copying.
+SaveMeTibo is third-party, not an official OpenAI API or a guarantee of all Tibo posts. Published alerts do not prove your personal account has reset. Five minutes is a local interval, not an end-to-end SLA. VPS, Bark or upstream failures cannot guarantee self-reporting through the same failed path. Ambiguous network timeouts may duplicate delivery; strict exactly-once is not guaranteed. Translation availability and semantic accuracy are not guaranteed. Historical fingerprints grow over time; monitor local state size.
 
-Public message content passes through the existing Bark service. This is not an entirely self-operated push infrastructure. See [SECURITY.md](SECURITY.md) for reporting and handling security issues.
+To remove: disable the timer, stop this service if necessary, remove only its units and code, then daemon-reload. Retain credentials/state and the dedicated user by default, deleting them only by explicit choice. Do not remove shared software or change networking.
 
-## Updating and removing
-
-Before an update, pause the timer and, if necessary, stop the service. Keep a protected backup of the current code and state. Check the new release and run its tests, then rerun the installer. Resume only after checking state compatibility and source health. A repeat install preserves credentials/state and the timer's current enablement state.
-
-To remove the installation, disable the timer and stop the task. Remove only its two unit files from `/etc/systemd/system/`, run `sudo systemctl daemon-reload`, and remove its code directory. By default, retain task state, credentials and the dedicated user for recovery. Delete those separately only when you intentionally want to discard them. Do not remove shared Python packages or change networking.
-
-## Known limitations
-
-- SaveMeTibo is a third-party source, not an official OpenAI API. It does not guarantee coverage of every Tibo post on X.
-- A community reset signal does not prove that your personal Codex account quota has reset.
-- Five minutes is the local polling interval, **not an end-to-end SLA** from a post to a phone notification.
-- VPS, Bark or upstream failures cannot reliably announce themselves through the same failed path. There is no independent heartbeat or fallback source.
-- An ambiguous network timeout can mean the service accepted a notification without the watcher seeing the response. Strict exactly-once delivery is not guaranteed.
-- Future upstream schema or lifecycle changes may need adaptation. Unknown core structures degrade safely; missing events alone are not treated as retractions.
-- Historical dedupe records are retained; monitor local state size during long-running deployments.
-
-## Development and license
+## Development
 
 ```sh
 python3 -m unittest discover -s tests -v
 python3 -m py_compile watcher.py
+sh -n deploy/install.sh
+sh -n deploy/activate.sh
+sh -n deploy/upgrade.sh
+git diff --check
 ```
 
-The 34 offline tests use synthetic data, temporary state and mock HTTP; no real device key is required. See [CONTRIBUTING.md](CONTRIBUTING.md), [CHANGELOG.md](CHANGELOG.md), and the [MIT license](LICENSE).
-
-## Disclaimer
+Tests use synthetic RSS, temporary state and mocked CLI/Bark calls. CI checks Python 3.11 and 3.14. See [CONTRIBUTING.md](CONTRIBUTING.md), [CHANGELOG.md](CHANGELOG.md), and [LICENSE](LICENSE).
 
 This project is not affiliated with OpenAI, Tibo, X, Bark, or SaveMeTibo.

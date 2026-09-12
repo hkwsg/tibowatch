@@ -1,6 +1,6 @@
 # Public release audit
 
-Release candidate: v1.0.0
+Historical release-content audit: v1.0.0. This records that release only; later changes require their own review.
 
 ## Results
 

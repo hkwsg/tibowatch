@@ -15,3 +15,21 @@ initialized
 *.pem
 *.key
 .DS_Store
+
+# Local runtime data, migration snapshots and developer scratch output
+state*.json
+*.json.bak
+runtime.env
+runtime/
+.local/
+.scratch/
+.codex/
+.pytest_cache/
+.coverage
+htmlcov/
+*.tmp
+*.swp
+*~
+# Keep synthetic fixtures and public example configuration trackable.
+!.env.example
+!*.env.example
