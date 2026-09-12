@@ -1,5 +1,5 @@
 [Unit]
-Description=Tibo public Codex signal monitor
+Description=TiboWatch published RSS alert forwarder
 After=network-online.target
 
 [Service]
@@ -7,6 +7,7 @@ Type=oneshot
 User=tibo-watch
 Group=tibo-watch
 EnvironmentFile=-/etc/tibo-watch/bark.env
+EnvironmentFile=-/etc/tibo-watch/runtime.env
 Environment=PYTHONDONTWRITEBYTECODE=1
 ExecStart=/usr/bin/python3 /opt/tibo-watch/watcher.py run-once
 WorkingDirectory=/opt/tibo-watch
