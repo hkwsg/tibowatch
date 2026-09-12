@@ -52,7 +52,7 @@ Codex — 重置已完成
 额度已恢复。
 ```
 
-The notification contains the upstream title and body, or their translation. TiboWatch adds no source label, timestamp or commentary. Tapping it opens the RSS item's link.
+The notification contains the upstream title and body, or their translation. TiboWatch adds no source label, timestamp or commentary. Tapping it opens the RSS item's valid HTTPS link, or the SaveMeTibo homepage if that link is missing or unsafe.
 
 ## How it works
 

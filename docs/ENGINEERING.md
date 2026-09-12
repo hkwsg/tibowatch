@@ -75,6 +75,8 @@ The example executable path is not a promise that every installation uses it. `T
 
 Reuse the deploying user's existing, authorized Codex login. With file-based storage, provision only the necessary `auth.json` into the service-side `CODEX_HOME`; keep that directory 0700 and the file 0600, owned by `tibo-watch`. The CLI manages authentication. Keyring-backed logins may require another supported setup or English-only operation; do not assume an auth file exists.
 
+Do not point `CODEX_HOME` at the interactive user's home or copy the full `.codex`, configuration or history. Auth contents stay out of Git, logs, chat and reports. Install a compatible CLI outside the protected home only when authorized; otherwise use English-only forwarding.
+
 The non-root service retains `ProtectHome=true`, `ProtectSystem=strict` and its resource limits. An interactive-user success is not proof of service-context success. Check translation using the actual service environment. No automatic credential-sync service is included; if authentication stops working, English fallback remains available and the local auth context can be refreshed when needed. See [SECURITY.md](../SECURITY.md).
 
 ## Everyday commands
@@ -98,7 +100,9 @@ sudo systemctl disable --now tibo-watch.timer
 sudo systemctl enable --now tibo-watch.timer
 ```
 
-A successful oneshot normally returns to inactive. Check the timer separately. Pausing a timer does not stop a running invocation; stop this service separately only when necessary.
+`status` reads local state; `check-source` fetches/parses the current feed without writing state. Both it and `dry-run` require outbound access, but neither calls Codex or Bark.
+
+A successful oneshot normally returns to inactive. Source errors can still exit zero: inspect state health and the latest successful source fetch as well as the service result. Check the timer separately. Pausing a timer does not stop a running invocation; stop this service separately only when necessary.
 
 ## Updates and removal
 
@@ -106,7 +110,7 @@ An existing working installation should not use fresh-install activation merely 
 
 For state v1, `deploy/upgrade.sh` pauses scheduling, rejects unresolved pending work, snapshots state, installs the reviewed code and checks new runs before resuming. First healthy RSS initialization creates the new baseline without replaying history. Use the matching release's procedure.
 
-For state v2, perform normal code/unit maintenance: back up, pause this task, let an active run finish, install the selected code, reload systemd if needed, verify state/source and resume. Do not rerun a v1 migration or delete state. Rollback requires matching code and state, accounting for any accepted notifications since the backup.
+For state v2, perform normal code/unit maintenance: back up, pause this task, let an active run finish, install the selected code, reload systemd if needed, verify state/source and resume only after successful checks. If verification fails, keep the timer paused and report the recovery action. Do not rerun a v1 migration or delete state. Rollback requires matching code and state, accounting for any accepted notifications since the backup.
 
 Removal starts by disabling the timer and stopping this service, then removing its units/code and reloading systemd. Keep state and credentials by default; delete them only when the user intends to discard them.
 

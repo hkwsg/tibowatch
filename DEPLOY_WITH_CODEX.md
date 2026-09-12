@@ -10,19 +10,19 @@ Use this file as a standalone prompt for an agent that can operate your Linux se
 
 Deploy TiboWatch from `https://github.com/hkwsg/tibowatch` on the Linux server I have authorized you to use. Aim to complete setup, rather than only returning commands for me to run. Reuse the supplied repository checkout and server context when available.
 
-Read the selected version's `AGENTS.md`, README, `docs/ENGINEERING.md` and deployment scripts. Give one brief setup summary, then perform routine steps within granted permissions. Ask only for missing target access, the Bark address, necessary permission prompts and phone confirmation. Do not ask me to choose an architecture or repeat information already supplied.
+Read this prompt and the repository guidance, then the selected version's README and deployment scripts. Read `AGENTS.md` and `docs/ENGINEERING.md` when present; older releases may not contain these new guides. Give one brief setup summary, then perform routine steps within granted permissions. Ask only for missing target access, the Bark address, necessary permission prompts and phone confirmation. Do not ask me to choose an architecture or repeat information already supplied.
 
 ### 1. Identify the target and version
 
 Use the current server or the authorized SSH connection I have named. Check the OS, systemd, Python, installation permissions and whether TiboWatch already exists. Use a persistent server, not an unrelated temporary chat environment. If you have no execution access to the target, explain that in one sentence and provide the handoff for a Codex session that does.
 
-Use my specified version; otherwise prefer a compatible published release. Pin and report the selected tag/commit. This workflow describes the RSS-based implementation: verify the selected code reads `feed.xml` and contains the documented entry points. If the newest published release is still an older implementation, say so and obtain approval before choosing unreleased code instead.
+Use my specified version; otherwise prefer a compatible published release. Pin and report the selected tag/commit. This workflow describes the RSS-based implementation: verify the selected code reads `feed.xml` and contains the documented entry points. If the newest published release is still an older implementation, say so and obtain approval before choosing unreleased code instead, unless I already authorized that branch/commit. A merged `main` is not necessarily a tagged release: do not silently deploy an older non-RSS release with this workflow.
 
 ### 2. Prepare the supported environment
 
 The supplied installation targets Linux with systemd and Python 3.11+. Reuse installed tools. Install only missing prerequisites covered by my installation authorization; use the normal permission prompt if required. An existing working installation follows the update path below, not fresh setup.
 
-Run the repository's offline checks. On a fresh target, use `deploy/install.sh` to install the dedicated service user, code and units. The script does not enable the timer or configure translation automatically.
+Run the repository's offline checks. On a fresh target, run `sudo sh deploy/install.sh` from the selected checkout root to install the dedicated service user, code and units. The script does not enable the timer or configure translation automatically.
 
 ### 3. Set up optional translation
 
@@ -40,15 +40,15 @@ If it has not already been provided or configured, ask in the user's language:
 
 Prefer a non-echoing terminal or secret input. If I already supplied the address in this private deployment conversation, use it for the authorized local configuration without requesting it again. Do not repeat the complete address in your response, command-line arguments, logs or repository files. Never request it in a public GitHub issue. The local-input option avoids adding the address to chat history.
 
-Validate the URL locally. The current configuration supports the HTTPS `api.day.app` origin. If Bark copied a sample URL with a notification title/body after the device key, normalize it to the base device address locally before passing it to the existing configuration logic. Do not open the push URL just to check it: that can send a notification.
+Validate the URL locally. The current configuration supports the HTTPS `api.day.app` origin. If Bark copied a sample URL with a notification title/body after the device key, normalize it to the base device address locally before passing it to the existing configuration logic. Require the exact HTTPS `api.day.app` authority (no userinfo or explicit port), take the first path segment as the device key and validate it as 8–256 ASCII letters, digits, underscores or hyphens. Strip only the sample title/body suffix and query/fragment; reject unsupported origins or invalid keys. The CLI itself accepts only the base address without query/fragment, not the copied sample URL. Do not open the push URL just to check it: that can send a notification.
 
-Use `configure-bark` through its private input, or an equivalent authorized secret-input path that applies the same validation and protected file permissions. Save only to the task's local configuration. Reuse a valid existing Bark configuration on updates.
+Use `sudo python3 /opt/tibo-watch/watcher.py configure-bark` in a non-echoing terminal, or an equivalent authorized secret-input path that applies the same validation and protected file permissions. Save only to the task's local configuration. Reuse a valid existing Bark configuration on updates.
 
 ### 5. Activate and verify
 
-For a fresh installation, run the existing `activate.sh` workflow. It sends one labeled installation test, establishes a healthy RSS baseline and enables the timer. Preserve its attempt marker, so repeating setup does not replay the test or historical alerts.
+For a fresh installation, run `sudo /opt/tibo-watch/activate.sh`. It sends one labeled installation test, establishes a healthy RSS baseline and enables the timer. Preserve its attempt marker, so repeating setup does not replay the test or historical alerts. If the test result is uncertain or activation fails, inspect the recorded state and timer status; do not delete the marker, automatically resend the test or claim activation succeeded.
 
-Check the configured source, state initialization, pending count, service result and timer enabled/active state. A finished oneshot being inactive is normal. Check the repeated-poll result without inventing new RSS business items. Genuine new upstream content during setup can legitimately produce a separate alert; distinguish it from the installation test.
+Check the configured source, state initialization, pending count, service result and timer enabled/active state. A finished oneshot being inactive is normal. `Result=success` alone does not prove a healthy source: source failures can be recorded in state with exit code zero. Verify a fresh successful source fetch and no health reason as well. Check the repeated-poll result without inventing new RSS business items. Genuine new upstream content during setup can legitimately produce a separate alert; distinguish it from the installation test.
 
 Ask me once whether the iPhone received the test. Record server acceptance separately from my confirmation. If I have not replied, report that phone receipt remains unconfirmed rather than inventing it. The deployment can otherwise report its actual running state.
 
