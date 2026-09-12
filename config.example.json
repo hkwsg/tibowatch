@@ -1,0 +1,12 @@
+{
+  "note": "Documented fixed v1 defaults; no secrets. Runtime uses watcher.py constants.",
+  "source_url": "https://savemetibo.com/status.json",
+  "bark_endpoint": "https://api.day.app/push",
+  "poll_seconds": 300,
+  "timezone": "Asia/Shanghai",
+  "http_timeout_seconds": 10,
+  "max_response_bytes": 2097152,
+  "stale_minutes": 30,
+  "outage_minutes": 60,
+  "catchup_hours": 6
+}

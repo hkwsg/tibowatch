@@ -1,0 +1,11 @@
+[Unit]
+Description=Poll Tibo public signals every five minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=15
+Unit=tibo-watch.service
+
+[Install]
+WantedBy=timers.target

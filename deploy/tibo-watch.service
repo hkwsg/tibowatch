@@ -1,0 +1,26 @@
+[Unit]
+Description=Tibo public Codex signal monitor
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=tibo-watch
+Group=tibo-watch
+EnvironmentFile=-/etc/tibo-watch/bark.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /opt/tibo-watch/watcher.py run-once
+WorkingDirectory=/opt/tibo-watch
+TimeoutStartSec=120
+MemoryMax=128M
+CPUQuota=20%
+Nice=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/tibo-watch
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+UMask=0077
+StandardOutput=journal
+StandardError=journal

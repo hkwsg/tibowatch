@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+*.env
+bark.env
+state.json
+state.backup.json
+state.lock
+state-fault-notice
+initialized
+*.log
+*.pem
+*.key
+.DS_Store
