@@ -16,7 +16,7 @@ Read this prompt and the repository guidance, then the selected version's README
 
 Use the current server or the authorized SSH connection I have named. Check the OS, systemd, Python, installation permissions and whether TiboWatch already exists. Use a persistent server, not an unrelated temporary chat environment. If you have no execution access to the target, explain that in one sentence and provide the handoff for a Codex session that does.
 
-Use my specified version; otherwise use the published `v1.1.0` tag for this guide. Pin and report the selected tag/commit. The [fixed release entry](https://github.com/hkwsg/tibowatch/blob/v1.1.0/DEPLOY_WITH_CODEX.md) describes the RSS-based implementation: verify the selected code reads `feed.xml` and contains the documented entry points. Do not silently substitute the older non-RSS v1.0.0 or an unreleased `main`. If I explicitly request a different release, follow that version's documentation.
+Use my specified version; otherwise use the published `v1.1.1` tag for this guide. Pin and report the selected tag/commit. The [fixed release entry](https://github.com/hkwsg/tibowatch/blob/v1.1.1/DEPLOY_WITH_CODEX.md) describes the RSS-based implementation: verify the selected code reads `feed.xml` and contains the documented entry points. Do not silently substitute the older non-RSS v1.0.0 or an unreleased `main`. If I explicitly request a different release, follow that version's documentation.
 
 ### 2. Prepare the supported environment
 
@@ -47,6 +47,8 @@ Use `sudo python3 /opt/tibo-watch/watcher.py configure-bark` in a non-echoing te
 ### 5. Activate and verify
 
 For a fresh installation, run `sudo /opt/tibo-watch/activate.sh`. It sends one labeled installation test, establishes a healthy RSS baseline and enables the timer. Preserve its attempt marker, so repeating setup does not replay the test or historical alerts. If the test result is uncertain or activation fails, inspect the recorded state and timer status; do not delete the marker, automatically resend the test or claim activation succeeded.
+
+New notifications omit external click URLs and request Bark history archival. If a display check is authorized, distinguish the actual phone archive/click result from server acceptance; do not resend old alerts just to verify this patch.
 
 Check the configured source, state initialization, pending count, service result and timer enabled/active state. A finished oneshot being inactive is normal. `Result=success` alone does not prove a healthy source: source failures can be recorded in state with exit code zero. Verify a fresh successful source fetch and no health reason as well. Check the repeated-poll result without inventing new RSS business items. Genuine new upstream content during setup can legitimately produce a separate alert; distinguish it from the installation test.
 

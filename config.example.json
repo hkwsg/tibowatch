@@ -1,6 +1,8 @@
 {
   "note": "Documented fixed defaults; not a runtime configuration file. No secrets.",
   "source_url": "https://savemetibo.com/feed.xml",
+  "supplement_url": "https://savemetibo.com/status.json",
+  "supplement_timeout_seconds": 5,
   "bark_endpoint": "https://api.day.app/push",
   "poll_seconds": 300,
   "http_timeout_seconds": 10,

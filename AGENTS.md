@@ -19,7 +19,7 @@ The checked-out code is the authority for supported commands and defaults. `conf
 
 ## Preserve the small design
 
-Keep RSS title/body as the content source. Do not add editorial filtering or notification annotations. Select translation once per new/changed item, persist the result before delivery, and reuse it on Bark retries. Keep the original-English fallback, quiet historical baseline, state lock/backup and existing installation-test marker.
+Keep RSS title/body as the content source. Do not add editorial filtering or invented annotations. The approved display fields are the exact lifecycle publication probability at the title end and an optional matching upstream icon; never use a parent event or homepage probability. Final Bark output omits url/action and requests history archival. Select translation once per new/changed item, persist the result before delivery, and reuse it on Bark retries. Keep the original-English fallback, quiet historical baseline, state lock/backup and existing installation-test marker.
 
 Use the target user's own existing Codex authentication when authorized, not the maintainer's account. Keep device/auth credentials in local protected configuration rather than repository files or reports. Restrict changes to this task's installation and preserve existing state during upgrades.
 
