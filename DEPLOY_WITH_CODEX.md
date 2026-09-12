@@ -16,7 +16,7 @@ Read this prompt and the repository guidance, then the selected version's README
 
 Use the current server or the authorized SSH connection I have named. Check the OS, systemd, Python, installation permissions and whether TiboWatch already exists. Use a persistent server, not an unrelated temporary chat environment. If you have no execution access to the target, explain that in one sentence and provide the handoff for a Codex session that does.
 
-Use my specified version; otherwise use the published `v1.1.1` tag for this guide. Pin and report the selected tag/commit. The [fixed release entry](https://github.com/hkwsg/tibowatch/blob/v1.1.1/DEPLOY_WITH_CODEX.md) describes the RSS-based implementation: verify the selected code reads `feed.xml` and contains the documented entry points. Do not silently substitute the older non-RSS v1.0.0 or an unreleased `main`. If I explicitly request a different release, follow that version's documentation.
+Use my specified version; otherwise use the published `v1.1.2` tag for this guide. Pin and report the selected tag/commit. The [fixed release entry](https://github.com/hkwsg/tibowatch/blob/v1.1.2/DEPLOY_WITH_CODEX.md) describes the RSS-based implementation: verify the selected code reads `feed.xml` and contains the documented entry points. Do not silently substitute the older non-RSS v1.0.0 or an unreleased `main`. If I explicitly request a different release, follow that version's documentation.
 
 ### 2. Prepare the supported environment
 

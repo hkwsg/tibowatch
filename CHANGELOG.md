@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.2 — 2026-09-13
+
+- Add an optional fixed notification icon via `TIBOWATCH_ICON_URL`.
+- Include the final owner-approved PNG and pin the example URL to its immutable commit.
+- Persist the selected icon with each alert; configuration changes do not alter pending retries.
+- Keep the existing upstream-icon fallback, text-first payload budget, RSS/translation behavior and state v2 compatibility.
+
 ## v1.1.1 — 2026-09-13
 
 - Omit Bark external click URLs and request history archival, including pending retries.

@@ -195,6 +195,15 @@ class Display(unittest.TestCase):
         self.assertEqual(self.sent[-1]['icon'],custom)
         self.assertEqual(self.supplement_calls,1);self.assertEqual(self.translator.call_count,1)
 
+    def test_repository_icon_requires_exact_immutable_public_path(self):
+        good='https://raw.githubusercontent.com/hkwsg/tibowatch/'+'a'*40+'/assets/notification-icon.png'
+        self.assertTrue(w.icon_url(good))
+        for bad in [good.replace('a'*40,'main'),good+'?x=1',good+'#x',
+                    good.replace('/hkwsg/','/other/'),good.replace('https://','https://user@'),
+                    good.replace('githubusercontent.com','githubusercontent.com.evil'),
+                    good.replace('notification-icon.png','other.png')]:
+            self.assertFalse(w.icon_url(bad))
+
     def test_invalid_configured_icon_uses_upstream(self):
         with patch.dict(w.os.environ,{'TIBOWATCH_ICON_URL':'https://evil.test/icon.png'}):self.notify()
         self.assertEqual(self.sent[-1]['icon'],self.events[0]['lifecycle'][0]['share_card_url'])
