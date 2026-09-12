@@ -55,9 +55,9 @@ codex exec --ephemeral --ignore-user-config --ignore-rules \
   --output-last-message <临时输出> -
 ```
 
-程序使用参数数组，通过 stdin 传入 JSON 数据，不拼接 shell 命令。使用独立临时目录、**8 秒超时**、丢弃 stdout/stderr、不把 Bark key 传给 CLI；严格解析只有 title/body 两个字符串字段的最终 JSON，超时杀死进程组。提示词要求完整翻译、不概括、不遗漏、不解释、不加标签或审查，保留 Codex、Astra、ChatGPT 等名称。结构校验不能证明语义准确性。
+程序使用参数数组，通过 stdin 传入 JSON 数据，不拼接 shell 命令。使用独立临时目录、**30 秒超时**、丢弃 stdout/stderr、不把 Bark key 传给 CLI；严格解析只有 title/body 两个字符串字段的最终 JSON，超时杀死进程组。提示词要求完整翻译、不概括、不遗漏、不解释、不加标签或审查，保留 Codex、Astra、ChatGPT 等名称。结构校验不能证明语义准确性。
 
-调用前先落盘英文回退和尝试标记；若翻译期间进程崩溃，下次发送保存的英文而非重译。成功后原子保存译文。Bark 重试绝不再调用 Codex，即使之后登录或模型恢复。每轮最多处理五条内容选择和五条发送，其余保留在同一个持久队列。
+调用前先落盘英文回退和尝试标记；若翻译期间进程崩溃，下次发送保存的英文而非重译。成功后原子保存译文。Bark 重试绝不再调用 Codex，即使之后登录或模型恢复。systemd oneshot 总时限为 240 秒。每轮最多处理五条内容选择和五条发送，其余保留在同一个持久队列。
 
 systemd 可加载非敏感 `/etc/tibo-watch/runtime.env`，样例见 [deploy/runtime.env.example](deploy/runtime.env.example)：
 

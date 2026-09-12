@@ -7,6 +7,6 @@
   "max_response_bytes": 2097152,
   "max_payload_bytes": 3000,
   "translation_model": "gpt-5.6-luna",
-  "translation_timeout_seconds": 8,
+  "translation_timeout_seconds": 30,
   "max_selections_and_sends_per_run": 5
 }

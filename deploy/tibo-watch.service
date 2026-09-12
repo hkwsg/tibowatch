@@ -11,7 +11,7 @@ EnvironmentFile=-/etc/tibo-watch/runtime.env
 Environment=PYTHONDONTWRITEBYTECODE=1
 ExecStart=/usr/bin/python3 /opt/tibo-watch/watcher.py run-once
 WorkingDirectory=/opt/tibo-watch
-TimeoutStartSec=120
+TimeoutStartSec=240
 MemoryMax=128M
 CPUQuota=20%
 Nice=10

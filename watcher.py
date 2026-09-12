@@ -26,7 +26,7 @@ ENDPOINT = 'https://api.day.app/push'
 HOME_URL = 'https://savemetibo.com/'
 LIMIT = 2097152
 PAYLOAD_LIMIT = 3000  # Conservative v1 budget; never truncate to fit it.
-TRANSLATION_TIMEOUT = 8
+TRANSLATION_TIMEOUT = 30
 MODEL = 'gpt-5.6-luna'
 BATCH = 5
 

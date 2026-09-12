@@ -60,9 +60,9 @@ codex exec --ephemeral --ignore-user-config --ignore-rules \
   --output-last-message <temporary-output> -
 ```
 
-The program uses an argument array and JSON text through stdin, never a shell command string. It uses a temporary working directory, an **8-second timeout**, discarded stdout/stderr, no Bark key in the subprocess environment, and strict final JSON parsing with exactly `title` and `body` string fields. It kills the process group on timeout. The prompt requests complete translation, no summary/omission/commentary, and preservation of product names such as Codex, Astra and ChatGPT. Structural validation cannot prove semantic translation accuracy.
+The program uses an argument array and JSON text through stdin, never a shell command string. It uses a temporary working directory, an **30-second timeout**, discarded stdout/stderr, no Bark key in the subprocess environment, and strict final JSON parsing with exactly `title` and `body` string fields. It kills the process group on timeout. The prompt requests complete translation, no summary/omission/commentary, and preservation of product names such as Codex, Astra and ChatGPT. Structural validation cannot prove semantic translation accuracy.
 
-The original English fallback and an attempt marker are saved **before** invocation. If the process crashes during translation, the next run sends that stored English rather than translating again. A successful selection replaces it atomically. Bark retries never retranslate, even when login or models later become available. Up to five payload selections and five sends are processed per poll; excess items remain in the same persistent queue.
+The original English fallback and an attempt marker are saved **before** invocation. If the process crashes during translation, the next run sends that stored English rather than translating again. A successful selection replaces it atomically. Bark retries never retranslate, even when login or models later become available. The systemd oneshot limit is 240 seconds. Up to five payload selections and five sends are processed per poll; excess items remain in the same persistent queue.
 
 The systemd unit can read optional non-secret `/etc/tibo-watch/runtime.env` settings; see [deploy/runtime.env.example](deploy/runtime.env.example):
 

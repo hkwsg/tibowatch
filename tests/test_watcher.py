@@ -229,7 +229,7 @@ class CodexInvocation(unittest.TestCase):
         self.assertEqual(self.args[self.args.index('--model')+1],'gpt-5.6-luna')
         self.assertNotIn('$(not-a-command)',self.args);self.assertIn(b'$(not-a-command)',self.input)
         self.assertNotIn('BARK_KEY',self.kwargs['env']);self.assertTrue(self.kwargs['start_new_session'])
-        self.assertEqual(self.timeout,8);self.assertNotIn('shell',self.kwargs)
+        self.assertEqual(self.timeout,30);self.assertNotIn('shell',self.kwargs)
     def test_invalid_cli_output(self):
         for raw in [b'not json',b'{"title":"x","body":"y","extra":1}',b'{"title":"x","body":"y","body":"z"}',b'{"title":1,"body":"x"}']:
             self.output=raw
